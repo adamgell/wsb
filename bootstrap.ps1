@@ -4,7 +4,7 @@ $ProgressPreference = 'SilentlyContinue'
 #region Functions
 
 Function Set-RegistryValue([String]$Path, [String]$Name, $Value, [String]$Type) {
-  <#
+    <#
   .SYNOPSIS
   Edit or create a registry value
   .PARAMETER Path
@@ -20,19 +20,19 @@ Function Set-RegistryValue([String]$Path, [String]$Name, $Value, [String]$Type) 
   Set-RegistryValue -Path "HKLM:\SOFTWARE\Strappazzon\wsb" -Name "Example" -Value "Yes" -Type String
   #>
 
-  If (!(Test-Path $Path)) {
-    New-Item -Path $Path -Force | Out-Null
-  }
-  If (Get-ItemProperty -Path $Path -Name $Name -ErrorAction SilentlyContinue) {
-    Set-ItemProperty -Path $Path -Name $Name -Value $Value -Type $Type
-  } Else {
-    New-ItemProperty -Path $Path -Name $Name -Value $Value -Type $Type -Force | Out-Null
-  }
+    If (!(Test-Path $Path)) {
+        New-Item -Path $Path -Force | Out-Null
+    }
+    If (Get-ItemProperty -Path $Path -Name $Name -ErrorAction SilentlyContinue) {
+        Set-ItemProperty -Path $Path -Name $Name -Value $Value -Type $Type
+    } Else {
+        New-ItemProperty -Path $Path -Name $Name -Value $Value -Type $Type -Force | Out-Null
+    }
 }
 
 # https://stackoverflow.com/a/9701907/16036749
 Function New-Shortcut([String]$Target, [String]$Destination) {
-  <#
+    <#
   .SYNOPSIS
   Create a shortcut
   .PARAMETER Target
@@ -43,14 +43,14 @@ Function New-Shortcut([String]$Target, [String]$Destination) {
   New-Shortcut -Target "C:\bin\Program.exe" -Destination "C:\Users\WDAGUtilityAccount\Desktop\Program.lnk"
   #>
 
-  $WScriptShell = New-Object -ComObject WScript.Shell
-  $Shortcut = $WScriptShell.CreateShortcut($Destination)
-  $Shortcut.TargetPath = $Target
-  $Shortcut.Save()
+    $WScriptShell = New-Object -ComObject WScript.Shell
+    $Shortcut = $WScriptShell.CreateShortcut($Destination)
+    $Shortcut.TargetPath = $Target
+    $Shortcut.Save()
 }
 
 Function Update-Wallpaper([String]$Image) {
-  <#
+    <#
   .SYNOPSIS
   Applies a specified wallpaper to the current user Desktop
   .PARAMETER Image
@@ -61,7 +61,7 @@ Function Update-Wallpaper([String]$Image) {
   https://www.joseespitia.com/2017/09/15/set-wallpaper-powershell-function/
   #>
 
-  Add-Type -TypeDefinition @'
+    Add-Type -TypeDefinition @'
   using System;
   using System.Runtime.InteropServices;
   public class Params {
@@ -70,42 +70,42 @@ Function Update-Wallpaper([String]$Image) {
   }
 '@
 
-  $SPI_SETDESKWALLPAPER = 0x0014
-  $UpdateIniFile = 0x01
-  $SendChangeEvent = 0x02
+    $SPI_SETDESKWALLPAPER = 0x0014
+    $UpdateIniFile = 0x01
+    $SendChangeEvent = 0x02
 
-  $fWinIni = $UpdateIniFile -bor $SendChangeEvent
+    $fWinIni = $UpdateIniFile -bor $SendChangeEvent
 
-  $ret = [Params]::SystemParametersInfo($SPI_SETDESKWALLPAPER, 0, $Image, $fWinIni)
+    $ret = [Params]::SystemParametersInfo($SPI_SETDESKWALLPAPER, 0, $Image, $fWinIni)
 }
 
 Function Restart-Explorer {
-  <#
+    <#
   .SYNOPSIS
   Restart Windows Explorer
   #>
 
-  Stop-Process -Name 'Explorer' -Force
-  # Give Windows Explorer time to start
-  Start-Sleep -Seconds 3
+    Stop-Process -Name 'Explorer' -Force
+    # Give Windows Explorer time to start
+    Start-Sleep -Seconds 3
 
-  # Verify that Windows Explorer has restarted
-  Try {
-    $p = Get-Process -Name 'Explorer' -ErrorAction Stop
-  } Catch {
+    # Verify that Windows Explorer has restarted
     Try {
-      Invoke-Item 'explorer.exe'
-      # Start-Process 'explorer.exe'
+        $p = Get-Process -Name 'Explorer' -ErrorAction Stop
     } Catch {
-      # This should never be called
-      Throw $_
+        Try {
+            Invoke-Item 'explorer.exe'
+            # Start-Process 'explorer.exe'
+        } Catch {
+            # This should never be called
+            Throw $_
+        }
     }
-  }
 }
 
 # https://stackoverflow.com/a/74251719
 Function Test-WinVersion([String]$MatchString) {
-  # (Get-ComputerInfo | Select-Object -ExpandProperty 'OsName') -like "*${MatchString}*"
+    # (Get-ComputerInfo | Select-Object -ExpandProperty 'OsName') -like "*${MatchString}*"
   (Get-ComputerInfo | Select-Object -ExpandProperty 'OsName') -match $MatchString | Out-Null
 }
 
@@ -136,7 +136,7 @@ Set-RegistryValue -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explore
 # Taskbar
 # Show "End Task" when right clicking
 If (Test-WinVersion -MatchString 'Windows 11') {
-  Set-RegistryValue -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings' -Name 'TaskbarEndTask' -Value 1 -Type DWord
+    Set-RegistryValue -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\TaskbarDeveloperSettings' -Name 'TaskbarEndTask' -Value 1 -Type DWord
 }
 
 # Windows Explorer
@@ -165,15 +165,15 @@ Set-RegistryValue -Path 'HKCU:\SOFTWARE\Microsoft\Windows\Shell\Bags\1\Desktop' 
 # Wallpaper
 $wallpaper = 'C:\bootstrap\theme\wallpaper.jpg'
 If (Test-Path -Path "${wallpaper}" -PathType Leaf) {
-  Update-Wallpaper -Image $wallpaper
-  # Set-RegistryValue -Path 'HKCU:\Control Panel\Desktop\' -Name 'Wallpaper' -Value "${wallpaper}" -Type String
-  # Invoke-Command { C:\windows\System32\RUNDLL32.EXE user32.dll, UpdatePerUserSystemParameters 1, True }
+    Update-Wallpaper -Image $wallpaper
+    # Set-RegistryValue -Path 'HKCU:\Control Panel\Desktop\' -Name 'Wallpaper' -Value "${wallpaper}" -Type String
+    # Invoke-Command { C:\windows\System32\RUNDLL32.EXE user32.dll, UpdatePerUserSystemParameters 1, True }
 }
 
 # Start menu
 # "More recommendations" setting
 If (Test-WinVersion -MatchString 'Windows 11') {
-  Set-RegistryValue -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'Start_Layout' -Value 2 -Type DWord
+    Set-RegistryValue -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'Start_Layout' -Value 2 -Type DWord
 }
 
 # Taskbar
@@ -181,7 +181,7 @@ If (Test-WinVersion -MatchString 'Windows 11') {
 Set-RegistryValue -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Search'              -Name 'SearchboxTaskbarMode' -Value 0 -Type DWord
 # Small icons
 If (Test-WinVersion -MatchString 'Windows 10') {
-  Set-RegistryValue -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'TaskbarSmallIcons'    -Value 1 -Type DWord
+    Set-RegistryValue -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced' -Name 'TaskbarSmallIcons'    -Value 1 -Type DWord
 }
 # Hide Task View button
 Set-RegistryValue -Path 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced'   -Name 'ShowTaskViewButton'   -Value 0 -Type DWord
@@ -204,48 +204,35 @@ Restart-Explorer
 
 #region winget
 
-# Create temporary folder for winget setup
-New-Item -Path "${env:TEMP}" -Name 'bootstrap-winget' -ItemType Directory | Out-Null
+$progressPreference = 'silentlyContinue'
+Write-Host 'Installing WinGet PowerShell module from PSGallery...'
+Install-PackageProvider -Name NuGet -Force | Out-Null
+Install-Module -Name Microsoft.WinGet.Client -Force -Repository PSGallery | Out-Null
+Write-Host 'Using Repair-WinGetPackageManager cmdlet to bootstrap WinGet...'
+Repair-WinGetPackageManager
+Write-Host 'Done.'
 
-# Download winget and its dependencies
-Write-Host 'Installing Windows Package Manager...' -ForegroundColor Blue
-Write-Host '- Downloading dependencies...' -ForegroundColor Blue
-# https://learn.microsoft.com/en-us/windows/package-manager/winget/#install-winget-on-windows-sandbox
-# https://learn.microsoft.com/en-us/troubleshoot/developer/visualstudio/cpp/libraries/c-runtime-packages-desktop-bridge
-Invoke-WebRequest -Uri 'https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx' -OutFile "${env:TEMP}\bootstrap-winget\Microsoft.VCLibs.x64.14.00.Desktop.appx"
-Invoke-WebRequest -Uri 'https://github.com/microsoft/microsoft-ui-xaml/releases/download/v2.8.6/Microsoft.UI.Xaml.2.8.x64.appx' -OutFile "${env:TEMP}\bootstrap-winget\Microsoft.UI.Xaml.2.8.x64.appx"
-Invoke-WebRequest -Uri 'https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle' -OutFile "${env:TEMP}\bootstrap-winget\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
-
-# Install winget and its dependencies
-Write-Host '- Installing dependencies...' -ForegroundColor Blue
-Add-AppxPackage -Path "${env:TEMP}\bootstrap-winget\Microsoft.VCLibs.x64.14.00.Desktop.appx"
-Add-AppxPackage -Path "${env:TEMP}\bootstrap-winget\Microsoft.UI.Xaml.2.8.x64.appx"
-Add-AppxPackage -Path "${env:TEMP}\bootstrap-winget\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle"
-
-# Remove temporary files
-Write-Host '- Cleaning up...' -ForegroundColor Blue
-Get-ChildItem -Path "${env:TEMP}\bootstrap-winget" -Recurse | Remove-Item -Force -Recurse
-Remove-Item "${env:TEMP}\bootstrap-winget" -Force
 
 # Install packages (msstore)
 @(
-  '9NZL0LRP1BNL', # NanaZip Preview
-  '9N0DX20HK701'  # Windows Terminal
+    '9NZL0LRP1BNL', # NanaZip Preview
+    '9N0DX20HK701', # Windows Terminal
+    '9MSMLRH6LZF3' # Windows Notepad
 ) | ForEach-Object {
-  Write-Host "Installing ${_}..." -ForegroundColor Blue;
-  & { winget install "${_}" --source msstore --accept-source-agreements --accept-package-agreements } | Out-Null
+    Write-Host "Installing ${_}..." -ForegroundColor Blue;
+    & { winget install "${_}" --source msstore --accept-source-agreements --accept-package-agreements } | Out-Null
 }
 
 # Install packages
 @(
-  'Microsoft.PowerShell',
-  'MHNexus.HxD',
-  'Microsoft.VCRedist.2015+.x64',
-  'Microsoft.VCRedist.2015+.x86',
-  'Mozilla.Firefox'
+    'Microsoft.PowerShell',
+    'MHNexus.HxD',
+    'Microsoft.VCRedist.2015+.x64',
+    'Microsoft.VCRedist.2015+.x86',
+    'Mozilla.Firefox'
 ) | ForEach-Object {
-  Write-Host "Installing ${_}..." -ForegroundColor Blue;
-  & { winget install --id="${_}" --exact --silent --scope machine --accept-source-agreements --accept-package-agreements } | Out-Null
+    Write-Host "Installing ${_}..." -ForegroundColor Blue;
+    & { winget install --id="${_}" --exact --silent --scope machine --accept-source-agreements --accept-package-agreements } | Out-Null
 }
 
 # Install packages with custom parameters
@@ -268,28 +255,28 @@ scoop config aria2-warning-enabled $false
 
 # Minimal scoop install
 @(
-  '7zip',
-  'aria2',
-  'git'
+    '7zip',
+    'aria2',
+    'git'
 ) | ForEach-Object {
-  # Write-Host "Installing ${_} ..." -ForegroundColor Blue;
-  scoop install $_
+    # Write-Host "Installing ${_} ..." -ForegroundColor Blue;
+    scoop install $_
 }
 
 # Add additional sources
 @(
-  'extras'
+    'extras'
 ) | ForEach-Object {
-  scoop bucket add $_
+    scoop bucket add $_
 }
 
 # Install additional packages
 @(
-  'dotpeek',
-  'sysinternals'
+    'dotpeek',
+    'sysinternals'
 ) | ForEach-Object {
-  # Write-Host "Installing ${_} ..." -ForegroundColor Blue;
-  scoop install $_
+    # Write-Host "Installing ${_} ..." -ForegroundColor Blue;
+    scoop install $_
 }
 
 #endregion scoop
